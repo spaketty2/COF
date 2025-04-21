@@ -10,12 +10,14 @@
       font-family: 'Segoe UI', sans-serif;
       text-align: center;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      user-select: none;
+      overflow-x: hidden;
     }
     h1 {
       color: #61DAFB;
       font-size: 32px;
-      margin: 30px 0;
+      margin: 30px 0 10px;
     }
     .label {
       font-size: 24px;
@@ -59,9 +61,60 @@
       background-color: #61DAFB;
       transition: width 0.3s ease;
     }
+
+    .note-buttons {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      flex-wrap: nowrap;
+      margin: 0;
+      padding: 0;
+      z-index: 999;
+    }
+    .note-btn {
+      background-color: #FFFFFF;
+      color: #282C34;
+      border: 0.5px solid #888;
+      font-size: 22px;
+      flex: 1 1 0;
+      padding: 150px 0;
+      border-radius: 0;
+      cursor: pointer;
+      margin: 0;
+    }
+    .note-btn:active {
+      background-color: #ddd;
+    }
+
+    .note-btn2 {
+      position: absolute;
+      background-color: #000000;
+      color: #FFFFFF;
+      border: 0.5px solid #333;
+      font-size: 18px;
+            padding: 100px 0;
+      border-radius: 0;
+      cursor: pointer;
+      z-index: 1000;
+            width: 80px;
+    }
+    .note-btn2:active {
+      background-color: #444;
+    }
+
+    /* ตำแหน่งปุ่มลอย */
+    #btnCsharp { left: 9%; bottom: 87px; }
+    #btnEb     { left: 23.4%; bottom: 87px; }
+    #btnFsharp { left: 51.8%; bottom: 87px; }
+    #btnGsharp { left: 66.2%; bottom: 87px; }
+    #btnBb     { left: 80.5%; bottom: 87px; }
+
   </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
 <h1 id="question">Press ▶ Start or Space to Begin</h1>
 <div class="feedback" id="feedback"></div>
@@ -69,6 +122,23 @@
 <div class="timer" id="timer"></div>
 <button id="startButton" onclick="startGame()">▶ Start</button>
 <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+
+<div class="note-buttons">
+  <button class="note-btn" onclick="manualAnswer('C')">1</button>
+  <button class="note-btn" onclick="manualAnswer('D')">2</button>
+  <button class="note-btn" onclick="manualAnswer('E')">3</button>
+  <button class="note-btn" onclick="manualAnswer('F')">4</button>
+  <button class="note-btn" onclick="manualAnswer('G')">5</button>
+  <button class="note-btn" onclick="manualAnswer('A')">6</button>
+  <button class="note-btn" onclick="manualAnswer('B')">7</button>
+</div>
+
+<!-- ปุ่มโน้ตดำ -->
+<button id="btnCsharp" class="note-btn2" onclick="manualAnswer('C#')">8</button>
+<button id="btnEb" class="note-btn2" onclick="manualAnswer('Eb')">9</button>
+<button id="btnFsharp" class="note-btn2" onclick="manualAnswer('F#')">10</button>
+<button id="btnGsharp" class="note-btn2" onclick="manualAnswer('G#')">11</button>
+<button id="btnBb" class="note-btn2" onclick="manualAnswer('Bb')">12</button>
 
 <script>
 const keyToNote = {
@@ -152,6 +222,29 @@ function checkAnswer(key) {
   if (!gameStarted || currentIndex >= maxRounds) return;
   let pressedKey = key.toLowerCase();
   let userNote = keyToNote[pressedKey];
+  if (!userNote) return;
+  let correctNote = positionToNote[questionList[currentIndex]];
+  if (currentSound) currentSound.pause();
+  stopCountdown();
+
+  if (userNote === correctNote) {
+    let elapsedTime = (new Date().getTime() - startTime) / 1000;
+    let baseScore = 100;
+    let bonusScore = calculateBonus(elapsedTime);
+    let totalScore = baseScore + bonusScore;
+    document.getElementById('feedback').innerText = `✅ Correct! +${totalScore} (Total: ${score + totalScore})`;
+    document.getElementById('feedback').style.color = '#32CD32';
+    score += totalScore;
+  } else {
+    document.getElementById('feedback').innerText = `❌ Wrong! ${correctNote} (Total: ${score})`;
+    document.getElementById('feedback').style.color = '#FF5555';
+  }
+  currentIndex++;
+  nextQuestion();
+}
+
+function manualAnswer(userNote) {
+  if (!gameStarted || currentIndex >= maxRounds) return;
   let correctNote = positionToNote[questionList[currentIndex]];
   if (currentSound) currentSound.pause();
   stopCountdown();
