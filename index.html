@@ -198,8 +198,29 @@ let maxRounds = 100;
 let currentSound = null;
 let timeLimit = 5;
 let countdownTimer = null;
+let audioContextUnlocked = false;
+
+function unlockAudio() {
+  if (audioContextUnlocked) return;
+
+  // สร้าง context เพื่อปลดล็อกระบบเสียง
+  const context = new (window.AudioContext || window.webkitAudioContext)();
+  const buffer = context.createBuffer(1, 1, 22050);
+  const source = context.createBufferSource();
+  source.buffer = buffer;
+  source.connect(context.destination);
+  source.start(0);
+
+  // resume context หากถูกระงับ
+  if (context.state === 'suspended') {
+    context.resume();
+  }
+
+  audioContextUnlocked = true;
+}
 
 function startGame() {
+  unlockAudio(); // ✅ เพิ่มบรรทัดนี้ เพื่อปลดล็อกระบบเสียง
   gameStarted = true;
   score = 0;
   currentIndex = 0;
