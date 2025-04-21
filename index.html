@@ -13,10 +13,12 @@
       padding: 0;
       user-select: none;
       overflow-x: hidden;
+      min-width: 360px;
+      min-height: 640px;
     }
     h1 {
       color: #61DAFB;
-      font-size: 32px;
+      font-size: 24px;
       margin: 30px 0 10px;
     }
     .label {
@@ -79,7 +81,7 @@
       border: 0.5px solid #888;
       font-size: 22px;
       flex: 1 1 0;
-      padding: 150px 0;
+      padding: 100px 0;
       border-radius: 0;
       cursor: pointer;
       margin: 0;
@@ -94,28 +96,57 @@
       color: #FFFFFF;
       border: 0.5px solid #333;
       font-size: 18px;
-            padding: 100px 0;
+      padding: 70px 0;
       border-radius: 0;
       cursor: pointer;
       z-index: 1000;
-            width: 80px;
+      width: 50px;
     }
     .note-btn2:active {
       background-color: #444;
     }
 
     /* ตำแหน่งปุ่มลอย */
-    #btnCsharp { left: 9%; bottom: 87px; }
-    #btnEb     { left: 23.4%; bottom: 87px; }
-    #btnFsharp { left: 51.8%; bottom: 87px; }
-    #btnGsharp { left: 66.2%; bottom: 87px; }
-    #btnBb     { left: 80.5%; bottom: 87px; }
+    #btnCsharp { left: 9%; bottom: 42px; }
+    #btnEb     { left: 23.4%; bottom: 42px; }
+    #btnFsharp { left: 51.8%; bottom: 42px; }
+    #btnGsharp { left: 66.2%; bottom: 42px; }
+    #btnBb     { left: 80.5%; bottom: 42px; }
+
+    @media (max-width: 360px) {
+      h1 {
+        font-size: 22px;
+      }
+      .label {
+        font-size: 20px;
+      }
+      .feedback {
+        font-size: 20px;
+      }
+      button {
+        font-size: 24px;
+        padding: 12px 20px;
+      }
+      .note-btn {
+        font-size: 20px;
+        padding: 80px 0;
+      }
+      .note-btn2 {
+        font-size: 16px;
+        padding: 60px 0;
+        width: 45px;
+      }
+      .timer {
+        font-size: 18px;
+      }
+    }
 
   </style>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 </head>
 <body oncontextmenu="return false;">
 
+<div style="height:50px"></div>
 <h1 id="question">Press ▶ Start or Space to Begin</h1>
 <div class="feedback" id="feedback"></div>
 <div class="label score" id="score">Score: 0</div>
@@ -124,21 +155,21 @@
 <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
 
 <div class="note-buttons">
-  <button class="note-btn" onclick="manualAnswer('C')">1</button>
-  <button class="note-btn" onclick="manualAnswer('D')">2</button>
-  <button class="note-btn" onclick="manualAnswer('E')">3</button>
-  <button class="note-btn" onclick="manualAnswer('F')">4</button>
-  <button class="note-btn" onclick="manualAnswer('G')">5</button>
-  <button class="note-btn" onclick="manualAnswer('A')">6</button>
-  <button class="note-btn" onclick="manualAnswer('B')">7</button>
+  <button class="note-btn" onclick="manualAnswer('C')"></button>
+  <button class="note-btn" onclick="manualAnswer('D')"></button>
+  <button class="note-btn" onclick="manualAnswer('E')"></button>
+  <button class="note-btn" onclick="manualAnswer('F')"></button>
+  <button class="note-btn" onclick="manualAnswer('G')"></button>
+  <button class="note-btn" onclick="manualAnswer('A')"></button>
+  <button class="note-btn" onclick="manualAnswer('B')"></button>
 </div>
 
 <!-- ปุ่มโน้ตดำ -->
-<button id="btnCsharp" class="note-btn2" onclick="manualAnswer('C#')">8</button>
-<button id="btnEb" class="note-btn2" onclick="manualAnswer('Eb')">9</button>
-<button id="btnFsharp" class="note-btn2" onclick="manualAnswer('F#')">10</button>
-<button id="btnGsharp" class="note-btn2" onclick="manualAnswer('G#')">11</button>
-<button id="btnBb" class="note-btn2" onclick="manualAnswer('Bb')">12</button>
+<button id="btnCsharp" class="note-btn2" onclick="manualAnswer('C#')"></button>
+<button id="btnEb" class="note-btn2" onclick="manualAnswer('Eb')"></button>
+<button id="btnFsharp" class="note-btn2" onclick="manualAnswer('F#')"></button>
+<button id="btnGsharp" class="note-btn2" onclick="manualAnswer('G#')"></button>
+<button id="btnBb" class="note-btn2" onclick="manualAnswer('Bb')"></button>
 
 <script>
 const keyToNote = {
