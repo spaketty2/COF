@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🎵 Circle of Fifths Note Guessing Game 🎵</title>
+  <style>
+    body {
+      background-color: #282C34;
+      color: #FFFFFF;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #61DAFB;
+      font-size: 32px;
+      margin: 30px 0;
+    }
+    .label {
+      font-size: 24px;
+      margin: 10px 0;
+    }
+    .score {
+      color: #FFD700;
+    }
+    .timer {
+      color: #21A1C4;
+      font-size: 20px;
+    }
+    .feedback {
+      font-size: 24px;
+      margin: 10px 0;
+    }
+    button {
+      background-color: #61DAFB;
+      color: #282C34;
+      border: none;
+      padding: 15px 30px;
+      font-size: 28px;
+      margin: 20px 0;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:active {
+      background-color: #21A1C4;
+    }
+    .progress {
+      width: 80%;
+      height: 20px;
+      background-color: #444;
+      margin: 20px auto;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: #61DAFB;
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+
+<h1 id="question">Press ▶ Start or Space to Begin</h1>
+<div class="feedback" id="feedback"></div>
+<div class="label score" id="score">Score: 0</div>
+<div class="timer" id="timer"></div>
+<button id="startButton" onclick="startGame()">▶ Start</button>
+<div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+
+<script>
+const keyToNote = {
+  'v': 'C', 'g': 'C#', 'b': 'D', 'h': 'Eb', 'n': 'E', 'm': 'F',
+  'k': 'F#', ',': 'G', 'l': 'G#', '.': 'A', ';': 'Bb', '/': 'B'
+};
+
+const positionToNote = {
+  1: 'G', 2: 'D', 3: 'A', 4: 'E', 5: 'B', 6: 'F#',
+  7: 'Db', 8: 'Ab', 9: 'Eb', 10: 'Bb', 11: 'F', 12: 'C'
+};
+
+const noteSounds = {};
+const notes = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
+
+notes.forEach(note => {
+  noteSounds[note] = new Audio(`sounds/${note}4.wav`);
+});
+
+let gameStarted = false;
+let questionList = [];
+let currentIndex = 0;
+let score = 0;
+let startTime = 0;
+let maxRounds = 100;
+let currentSound = null;
+let timeLimit = 5;
+let countdownTimer = null;
+
+function startGame() {
+  gameStarted = true;
+  score = 0;
+  currentIndex = 0;
+  questionList = generateQuestions(maxRounds);
+  document.getElementById('startButton').style.display = 'none';
+  nextQuestion();
+}
+
+function generateQuestions(total) {
+  let numbers = [];
+  while (numbers.length < total) {
+    let batch = [...Array(12).keys()].map(x => x + 1);
+    batch.sort(() => Math.random() - 0.5);
+    numbers = numbers.concat(batch);
+  }
+  return numbers.slice(0, total);
+}
+
+function nextQuestion() {
+  if (currentIndex >= maxRounds) {
+    showResult();
+    return;
+  }
+  if (currentSound) currentSound.pause();
+  document.getElementById('question').innerText = formatRoundDisplay();
+  document.getElementById('score').innerText = `Score: ${score}`;
+  startTime = new Date().getTime();
+
+  const noteName = positionToNote[questionList[currentIndex]];
+  if (noteSounds[noteName]) {
+    currentSound = noteSounds[noteName];
+    currentSound.currentTime = 0;
+    currentSound.play();
+  }
+
+  startCountdown();
+  updateProgress();
+}
+
+function formatRoundDisplay() {
+  let displayNumbers = [];
+  for (let i = 0; i < 5; i++) {
+    if (currentIndex + i < maxRounds) {
+      displayNumbers.push(questionList[currentIndex + i]);
+    }
+  }
+  return `Round ${currentIndex + 1}:   ${displayNumbers.join(' - ')}`;
+}
+
+function checkAnswer(key) {
+  if (!gameStarted || currentIndex >= maxRounds) return;
+  let pressedKey = key.toLowerCase();
+  let userNote = keyToNote[pressedKey];
+  let correctNote = positionToNote[questionList[currentIndex]];
+  if (currentSound) currentSound.pause();
+  stopCountdown();
+
+  if (userNote === correctNote) {
+    let elapsedTime = (new Date().getTime() - startTime) / 1000;
+    let baseScore = 100;
+    let bonusScore = calculateBonus(elapsedTime);
+    let totalScore = baseScore + bonusScore;
+    document.getElementById('feedback').innerText = `✅ Correct! +${totalScore} (Total: ${score + totalScore})`;
+    document.getElementById('feedback').style.color = '#32CD32';
+    score += totalScore;
+  } else {
+    document.getElementById('feedback').innerText = `❌ Wrong! ${correctNote} (Total: ${score})`;
+    document.getElementById('feedback').style.color = '#FF5555';
+  }
+  currentIndex++;
+  nextQuestion();
+}
+
+function calculateBonus(elapsedTime) {
+  if (elapsedTime <= 0.3) return 100;
+  else if (elapsedTime <= 0.7) return Math.floor(30 + (70 * Math.exp(-7 * (elapsedTime - 0.3))));
+  else if (elapsedTime <= 1.0) return Math.floor(30 * Math.exp(-10 * (elapsedTime - 0.7)));
+  else return 0;
+}
+
+function showResult() {
+  gameStarted = false;
+  stopCountdown();
+  document.getElementById('question').innerHTML = `🎉 Game Over!<br>Your Score: ${score}`;
+  document.getElementById('feedback').innerText = '';
+  document.getElementById('startButton').innerText = "▶ Restart";
+  document.getElementById('startButton').style.display = 'inline-block';
+  document.getElementById('progressBar').style.width = '0%';
+  document.getElementById('timer').innerText = '';
+}
+
+function updateProgress() {
+  let percent = (currentIndex / maxRounds) * 100;
+  document.getElementById('progressBar').style.width = `${percent}%`;
+}
+
+function startCountdown() {
+  let timeLeft = timeLimit;
+  document.getElementById('timer').innerText = `⏳ ${timeLeft.toFixed(1)}s`;
+  countdownTimer = setInterval(() => {
+    timeLeft -= 0.1;
+    if (timeLeft <= 0) {
+      clearInterval(countdownTimer);
+      document.getElementById('feedback').innerText = `❌ Timeout! ${positionToNote[questionList[currentIndex]]} (Total: ${score})`;
+      document.getElementById('feedback').style.color = '#FF5555';
+      currentIndex++;
+      nextQuestion();
+    } else {
+      document.getElementById('timer').innerText = `⏳ ${timeLeft.toFixed(1)}s`;
+    }
+  }, 100);
+}
+
+function stopCountdown() {
+  if (countdownTimer) clearInterval(countdownTimer);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === ' ' && !gameStarted) startGame();
+  else if (e.key === 'Escape') window.close();
+  else if (gameStarted) checkAnswer(e.key);
+});
+</script>
+
+</body>
+</html>
